@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SelfHost": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "applicationUrl": "https://baldur.geuer-pollmann.de/.well-known/openid-configuration"
+    }
+  }
+}
