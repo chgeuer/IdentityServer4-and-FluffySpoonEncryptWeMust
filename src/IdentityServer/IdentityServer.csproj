@@ -9,7 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- <ProjectReference Include="..\..\..\..\ffMathy\FluffySpoon.AspNet.EncryptWeMust\src\FluffySpoon.AspNet.EncryptWeMust\FluffySpoon.AspNet.EncryptWeMust.csproj" /> -->
-    <!--<ProjectReference Include="..\..\..\..\natemcmaster\LettuceEncrypt\src\LettuceEncrypt\LettuceEncrypt.csproj" />-->
+    <ProjectReference Include="..\..\..\..\natemcmaster\LettuceEncrypt\src\LettuceEncrypt\LettuceEncrypt.csproj" />
     <ProjectReference Include="..\Addresses\Addresses.csproj" />
   </ItemGroup>
 </Project>

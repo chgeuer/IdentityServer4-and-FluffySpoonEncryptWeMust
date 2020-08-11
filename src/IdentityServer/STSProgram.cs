@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Security.Cryptography;
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -17,7 +16,7 @@
 
     using IdentityServer4;
     using IdentityServer4.Models;
-    // using LettuceEncrypt;
+    using LettuceEncrypt;
     using Addresses;
 
     public class STSProgram
@@ -64,26 +63,28 @@
                         .UseUrls("http://*", "https://*")
                         .UseStartup<STSStartup>()
                         .UseKestrel(kestrelServerOptions =>
-                        { 
-                            //kestrelServerOptions.ConfigureHttpsDefaults(h =>
-                            //{
-                            //    // h.UseLettuceEncrypt(kestrelServerOptions.ApplicationServices);
-                            //});
+                        {
+                            kestrelServerOptions.ConfigureHttpsDefaults(h =>
+                            {
+                                // h.UseLettuceEncrypt(kestrelServerOptions.ApplicationServices);
+                            });
 
-                            //kestrelServerOptions.ListenAnyIP(
-                            //    port: 80,
-                            //    configure: lo => { 
-                            //        lo.Protocols = HttpProtocols.Http1AndHttp2;
-                            //    }
-                            //);
+                            kestrelServerOptions.ListenAnyIP(
+                                port: 80,
+                                configure: lo =>
+                                {
+                                    lo.Protocols = HttpProtocols.Http1AndHttp2;
+                                }
+                            );
 
-                            //kestrelServerOptions.ListenAnyIP(
-                            //    port: 443,
-                            //    configure: lo => {
-                            //        lo.Protocols = HttpProtocols.Http1AndHttp2;
-                            //        // lo.UseHttps(h => h.UseLettuceEncrypt(kestrelServerOptions.ApplicationServices));
-                            //    }
-                            //);
+                            kestrelServerOptions.ListenAnyIP(
+                                port: 443,
+                                configure: lo =>
+                                {
+                                    lo.Protocols = HttpProtocols.Http1AndHttp2;
+                                    lo.UseHttps(h => h.UseLettuceEncrypt(kestrelServerOptions.ApplicationServices));
+                                }
+                            );
                         }
                     );
                 }
@@ -110,12 +111,10 @@
             // uncomment, if you want to add an MVC-based UI
             //services.AddControllersWithViews();
 
-            //services
-            //    .AddLettuceEncrypt()
-            //    .PersistDataToDirectory(new DirectoryInfo(@"C:\github\chgeuer\quickstart\src\letuce"), "Password123");
+            services
+                .AddLettuceEncrypt()
+                .PersistDataToDirectory(new DirectoryInfo(@"C:\github\chgeuer\quickstart\src\letuce"), "Password123");
 
-
-            
 
             var identityServerBuilder = services
                 .AddIdentityServer(options =>
@@ -125,9 +124,9 @@
                 .AddInMemoryIdentityResources(Config.IdentityResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients)
-                // .AddSigningCredential(new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPrivateKey()), IdentityServerConstants.ECDsaSigningAlgorithm.ES256)
+                .AddSigningCredential(new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPrivateKey()), IdentityServerConstants.ECDsaSigningAlgorithm.ES256)
                 // .AddSigningCredential(certificate: tokenSigningCert, signingAlgorithm: nameof(IdentityServerConstants.ECDsaSigningAlgorithm.ES256)) // this crashes
-                .AddSigningCredential(new RsaSecurityKey(RSA.Create()), signingAlgorithm: IdentityServerConstants.RsaSigningAlgorithm.RS256)
+                // .AddSigningCredential(new RsaSecurityKey(RSA.Create()), signingAlgorithm: IdentityServerConstants.RsaSigningAlgorithm.RS256)
                 // .AddDeveloperSigningCredential() // not recommended for production - you need to store your key material somewhere secure
                 ;
         }

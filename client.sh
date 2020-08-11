@@ -6,7 +6,7 @@
 # echo quit | openssl s_client -showcerts -servername baldur.geuer-pollmann.de  -connect baldur.geuer-pollmann.de:443 | bat
 
 service="http://beam-lan:6001"
-sts_address="https://beam-lan"
+sts_address="https://baldur.geuer-pollmann.de"
 
 client_id="client"
 client_secret="secret"
