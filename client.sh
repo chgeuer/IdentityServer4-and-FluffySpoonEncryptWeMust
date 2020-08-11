@@ -6,7 +6,7 @@
 # echo quit | openssl s_client -showcerts -servername baldur.geuer-pollmann.de  -connect baldur.geuer-pollmann.de:443 | bat
 
 service="http://beam-lan:6001"
-sts_address="https://baldur.geuer-pollmann.de"
+sts_address="https://beam-lan"
 
 client_id="client"
 client_secret="secret"
@@ -31,6 +31,8 @@ access_token="$( curl \
     --data-urlencode "resource=${resource}" \
     "${token_endpoint}" | \
         jq -r ".access_token" )"
+
+
 
 function jwt_claims {
     local token="$1" ; 
