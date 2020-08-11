@@ -6,7 +6,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://baldur.geuer-pollmann.de/.well-known/openid-configuration"
+      "applicationUrl": "https://localhost/.well-known/openid-configuration"
     }
   }
 }

@@ -2,7 +2,6 @@ namespace Api
 {
     using System;
     using System.Linq;
-    using System.Security.Cryptography.X509Certificates;
     using Addresses;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -11,6 +10,7 @@ namespace Api
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.IdentityModel.Logging;
     using Microsoft.IdentityModel.Tokens;
 
     public class APIProgram
@@ -44,7 +44,7 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.ShowPII = true;
 
             services
                 .AddControllers();
@@ -57,23 +57,8 @@ namespace Api
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateAudience = false,
+                        ValidateIssuer = false,
                     };
-                    //options.TokenValidationParameters = new TokenValidationParameters
-                    //{
-                    //    // RequireSignedTokens = true,
-                    //    // ValidateIssuerSigningKey = true,
-                    //    // IssuerSigningKey = new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPublicKey()),
-                    //    ValidateIssuer = true,
-                    //    IssuerValidator = new IssuerValidator()
-                    //    IssuerSigningKeys = new[]
-                    //    { 
-                    //        new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPublicKey())
-                    //    },
-                    //    IssuerSigningKeyValidator = (sk, st, tvp) =>
-                    //    {
-                    //        return true;
-                    //    },
-                    //};
                 });
 
             services

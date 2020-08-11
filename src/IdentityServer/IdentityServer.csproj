@@ -5,12 +5,8 @@
   <ItemGroup>
     <PackageReference Include="IdentityServer4" Version="4.0.4" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
-    <!--<PackageReference Include="LettuceEncrypt" Version="1.0.0" />-->
-    <!--<PackageReference Include="FluffySpoon.AspNet.EncryptWeMust" Version="1.171.0" />-->
   </ItemGroup>
   <ItemGroup>
-    <!-- <ProjectReference Include="..\..\..\..\ffMathy\FluffySpoon.AspNet.EncryptWeMust\src\FluffySpoon.AspNet.EncryptWeMust\FluffySpoon.AspNet.EncryptWeMust.csproj" /> -->
-    <ProjectReference Include="..\..\..\..\natemcmaster\LettuceEncrypt\src\LettuceEncrypt\LettuceEncrypt.csproj" />
     <ProjectReference Include="..\Addresses\Addresses.csproj" />
   </ItemGroup>
 </Project>

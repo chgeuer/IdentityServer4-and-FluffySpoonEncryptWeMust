@@ -17,9 +17,8 @@
             await Console.In.ReadLineAsync();
 
             
-            // var client = new HttpClient(new HttpClientHandler { ServerCertificateCustomValidationCallback = (_message, _cert, _chain, _errors) => true });
-
-            var client = new HttpClient();
+            var client = new HttpClient(new HttpClientHandler { ServerCertificateCustomValidationCallback = (_message, _cert, _chain, _errors) => true });
+            // var client = new HttpClient();
             var disco = await client.GetDiscoveryDocumentAsync(Address.STS);
             if (disco.IsError)
             {
