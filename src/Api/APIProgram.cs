@@ -2,6 +2,7 @@ namespace Api
 {
     using System;
     using System.Linq;
+    using System.Security.Cryptography.X509Certificates;
     using Addresses;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -55,8 +56,24 @@ namespace Api
                     options.Authority = Address.STS;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateAudience = false
+                        ValidateAudience = false,
                     };
+                    //options.TokenValidationParameters = new TokenValidationParameters
+                    //{
+                    //    // RequireSignedTokens = true,
+                    //    // ValidateIssuerSigningKey = true,
+                    //    // IssuerSigningKey = new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPublicKey()),
+                    //    ValidateIssuer = true,
+                    //    IssuerValidator = new IssuerValidator()
+                    //    IssuerSigningKeys = new[]
+                    //    { 
+                    //        new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPublicKey())
+                    //    },
+                    //    IssuerSigningKeyValidator = (sk, st, tvp) =>
+                    //    {
+                    //        return true;
+                    //    },
+                    //};
                 });
 
             services
@@ -93,13 +110,13 @@ namespace Api
     }
 
     [Authorize]
-    [Route("identity")]
+    [Route("showmemyidentity")]
     public class IdentityController : ControllerBase
     {
         [HttpGet]
         public IActionResult Get()
         {
-            return new JsonResult(User.Claims.Select(c => new { c.Type, c.Value }));
+            return new JsonResult(this.User.Claims.Select(c => $"type={c.Type} value={c.Value}"));
         }
     }
 }

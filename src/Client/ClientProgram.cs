@@ -56,6 +56,9 @@
                 var content = await response.Content.ReadAsStringAsync();
                 await Console.Out.WriteLineAsync(JArray.Parse(content).ToString());
             }
+
+
+            await Console.In.ReadLineAsync();
         }
     }
 }

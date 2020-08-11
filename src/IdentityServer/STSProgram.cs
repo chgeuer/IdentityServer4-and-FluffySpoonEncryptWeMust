@@ -2,17 +2,22 @@
 {
     using System;
     using System.Collections.Generic;
-    using Certes;
-    using FluffySpoon.AspNet.EncryptWeMust;
-    using FluffySpoon.AspNet.EncryptWeMust.Certes;
-    using IdentityServer4.Models;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Security.Cryptography.X509Certificates;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Server.Kestrel.Core;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.IdentityModel.Tokens;
     using Serilog;
     using Serilog.Events;
     using Serilog.Sinks.SystemConsole.Themes;
+
+    using IdentityServer4;
+    using IdentityServer4.Models;
+    using LettuceEncrypt;
     using Addresses;
 
     public class STSProgram
@@ -55,36 +60,34 @@
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseKestrel()
-                        //.UseKestrel(kestrelServerOptions =>
-                        //{
-                        //    kestrelServerOptions.ListenAnyIP(
-                        //        port: 80,
-                        //        configure: lo => { lo.Protocols = HttpProtocols.Http1AndHttp2; }
-                        //    );
-                        //    kestrelServerOptions.ListenAnyIP(
-                        //        port: 443,
-                        //        configure: lo =>
-                        //        {
-                        //            lo.Protocols = HttpProtocols.Http1AndHttp2;
-                        //            lo.UseHttps(configureOptions: o =>
-                        //            {
-                        //                //if (LetsEncryptRenewalService.Certificate is LetsEncryptX509Certificate x509Certificate)
-                        //                //{
-                        //                //    options.ConfigureHttpsDefaults(o =>
-                        //                //    {
-                        //                //        o.ServerCertificateSelector = (_a, _b) => x509Certificate.GetCertificate();
-                        //                //    });
-                        //                //}
-                        //            });
-                        //        }
-                        //    );
-                        //})
+                        .PreferHostingUrls(false)
                         .UseUrls("http://*", "https://*")
                         .UseStartup<STSStartup>()
-                        ;
-;
-                });
+                        .UseKestrel(kestrelServerOptions =>
+                        {
+                            kestrelServerOptions.ConfigureHttpsDefaults(h =>
+                            {
+                                h.UseLettuceEncrypt(kestrelServerOptions.ApplicationServices);
+                            });
+
+                            kestrelServerOptions.ListenAnyIP(
+                                port: 80,
+                                configure: lo => { 
+                                    lo.Protocols = HttpProtocols.Http1AndHttp2;
+                                }
+                            );
+
+                            kestrelServerOptions.ListenAnyIP(
+                                port: 443,
+                                configure: lo => {
+                                    lo.Protocols = HttpProtocols.Http1AndHttp2;
+                                    lo.UseHttps(h => h.UseLettuceEncrypt(kestrelServerOptions.ApplicationServices));
+                                }
+                            );
+                        }
+                    );
+                }
+            );
 
             var host = hostBuilder.Build();
 
@@ -107,25 +110,12 @@
             // uncomment, if you want to add an MVC-based UI
             //services.AddControllersWithViews();
 
-            services.AddFluffySpoonLetsEncrypt(options: new LetsEncryptOptions
-            {
-                Email = "foo@web.de",
-                UseStaging = false,
-                Domains = new[] { Address.EXTERNAL_DNS },
-                TimeAfterIssueDateBeforeRenewal = TimeSpan.FromDays(7),
-                TimeUntilExpiryBeforeRenewal = TimeSpan.FromDays(30),
-                RenewalFailMode = RenewalFailMode.LogAndRetry,
-                CertificateSigningRequest = new CsrInfo
-                {
-                    Organization = "Christian Geuer-Pollmann",
-                    OrganizationUnit = "Private",
-                    State = "NRW",
-                    CountryName = "Germany",
-                    Locality = "DE",
-                },
-            });
-            services.AddFluffySpoonLetsEncryptFileCertificatePersistence();
-            services.AddFluffySpoonLetsEncryptFileChallengePersistence();
+            services
+                .AddLettuceEncrypt()
+                .PersistDataToDirectory(new DirectoryInfo(@"C:\github\chgeuer\quickstart\src\letuce"), "Password123");
+
+
+            
 
             var identityServerBuilder = services
                 .AddIdentityServer(options =>
@@ -135,10 +125,11 @@
                 .AddInMemoryIdentityResources(Config.IdentityResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients)
+                .AddSigningCredential(new ECDsaSecurityKey(ecdsa: Address.GetTokenSigningCertificate().GetECDsaPrivateKey()), IdentityServerConstants.ECDsaSigningAlgorithm.ES256)
+                // .AddSigningCredential(certificate: tokenSigningCert, signingAlgorithm: nameof(IdentityServerConstants.ECDsaSigningAlgorithm.ES256)) // this crashes
+                // .AddSigningCredential(new RsaSecurityKey(RSA.Create()), signingAlgorithm: IdentityServerConstants.RsaSigningAlgorithm.RS256)
+                // .AddDeveloperSigningCredential() // not recommended for production - you need to store your key material somewhere secure
                 ;
-
-            // not recommended for production - you need to store your key material somewhere secure
-            identityServerBuilder.AddDeveloperSigningCredential();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -152,7 +143,7 @@
             //app.UseStaticFiles();
             //app.UseRouting();
 
-            app.UseFluffySpoonLetsEncrypt();
+            // app.UseFluffySpoonLetsEncrypt();
 
             //const string LetsEncryptChallengePath = "/.well-known/acme-challenge";
             //app.MapWhen(
