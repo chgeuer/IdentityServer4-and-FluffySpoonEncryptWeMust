@@ -14,8 +14,8 @@ client_secret="secret"
 resource="${service}/showmemyidentity"
 
 token_endpoint="$( curl \
-    --silent \
-    --cacert ./cacert.pem \
+    --verbose \
+    --insecure \
     --request GET \
     "${sts_address}/.well-known/openid-configuration" | \
         jq -r ".token_endpoint" )"
